@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mino Matematik Oyun 2</title>
+<title>Minoş Games</title>
 
 <style>
 body{
@@ -14,6 +14,36 @@ body{
     text-align:center;
 }
 
+/* ===== INTRO ===== */
+#intro{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.neon{
+    font-size:60px;
+    color:#00f7ff;
+    text-shadow:
+    0 0 5px #00f7ff,
+    0 0 20px #00f7ff,
+    0 0 40px #00f7ff,
+    0 0 80px #00f7ff;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.1);}
+    100%{transform:scale(1);}
+}
+
+/* ===== MENU ===== */
 h1{
     font-size:40px;
     text-shadow:0 0 15px gold;
@@ -43,6 +73,7 @@ h1{
     justify-content:center;
     height:100vh;
 }
+
 input, select{
     padding:10px;
     font-size:18px;
@@ -50,30 +81,32 @@ input, select{
     border:none;
     text-align:center;
 }
-button{
-    margin-top:10px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- MENÜ -->
-<div id="menu">
-    <h1>🧮 MINO MATEMATİK OYUN 2</h1>
+<!-- INTRO -->
+<div id="intro">
+    <h1 class="neon">Minoş Games</h1>
+</div>
 
-    <p>🪙 Toplam Puan: <span id="menuCoins">0</span></p>
+<!-- MENU -->
+<div id="menu">
+    <h1>🧮 MINOŞ MATEMATİK OYUN</h1>
+
+    <p>🪙 Puan: <span id="menuCoins">0</span></p>
 
     <button class="btn" onclick="startGame()">▶ Oyna</button>
     <button class="btn" onclick="startBoss()">👹 Boss Fight</button>
     <button class="btn" onclick="openSettings()">⚙ Ayarlar</button>
-    <button class="btn" onclick="resetAll()">🔁 Puan Sıfırla</button>
+    <button class="btn" onclick="resetAll()">🔁 Sıfırla</button>
 </div>
 
-<!-- OYUN -->
+<!-- GAME -->
 <div id="game">
 
-    <h2>🧮 Soruyu Çöz</h2>
+    <h2>🧮 Soru</h2>
 
     <select id="difficulty">
         <option value="easy">Kolay (60 sn)</option>
@@ -111,7 +144,7 @@ button{
 
     <button onclick="checkBossAnswer()">Cevapla</button>
 
-    <button onclick="resetAll()">🔁 Puan Sıfırla</button>
+    <button onclick="resetAll()">🔁 Sıfırla</button>
 
     <p>⏱ Süre: <span id="bossTimer">10</span></p>
     <p>💀 Yaklaşma: <span id="danger">0</span>/3</p>
@@ -122,9 +155,8 @@ button{
     <button onclick="backMenu()">⬅ Menü</button>
 </div>
 
-<!-- AYARLAR -->
+<!-- SETTINGS -->
 <div id="settings">
-
     <h1>⚙ Ayarlar</h1>
 
     <button class="btn" onclick="toggleMusic()">🎵 Müzik</button>
@@ -136,6 +168,14 @@ button{
 
 <script>
 
+/* ===== INTRO ===== */
+window.onload = function(){
+    setTimeout(()=>{
+        document.getElementById("intro").style.display = "none";
+        document.getElementById("menu").style.display = "flex";
+    },3000);
+};
+
 /* ===== GLOBAL ===== */
 
 let answer;
@@ -146,7 +186,7 @@ let lives = 3;
 let time;
 let interval;
 
-/* ===== MENÜ ===== */
+/* ===== MENU ===== */
 
 function startGame(){
     hideAll();
@@ -170,18 +210,23 @@ function backMenu(){
     document.getElementById("menu").style.display = "flex";
 }
 
+function hideAll(){
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("game").style.display = "none";
+    document.getElementById("boss").style.display = "none";
+    document.getElementById("settings").style.display = "none";
+}
+
 /* ===== RESET ===== */
 
 function resetAll(){
-
     coins = 0;
     bossCoins = 0;
     totalCoins = 0;
     lives = 3;
 
     updateUI();
-
-    alert("🔁 Puanlar sıfırlandı!");
+    alert("🔁 Sıfırlandı!");
 }
 
 function updateUI(){
@@ -191,7 +236,7 @@ function updateUI(){
     document.getElementById("lives").innerText = lives;
 }
 
-/* ===== NORMAL OYUN ===== */
+/* ===== GAME ===== */
 
 function generateQuestion(){
 
@@ -202,8 +247,8 @@ function generateQuestion(){
     let max = 20;
     let timer = 60;
 
-    if(diff === "medium"){ max = 50; timer = 30; }
-    if(diff === "hard"){ max = 100; timer = 15; }
+    if(diff==="medium"){ max=50; timer=30; }
+    if(diff==="hard"){ max=100; timer=15; }
 
     let a = Math.floor(Math.random()*max)+1;
     let b = Math.floor(Math.random()*max)+1;
@@ -211,26 +256,25 @@ function generateQuestion(){
     let ops = ["+","-","*","/"];
     let op = ops[Math.floor(Math.random()*ops.length)];
 
-    if(op === "+") answer = a + b;
-    if(op === "-") answer = a - b;
-    if(op === "*") answer = a * b;
+    if(op==="+") answer = a+b;
+    if(op==="-") answer = a-b;
+    if(op==="*") answer = a*b;
 
-    if(op === "/"){
+    if(op==="/"){
         answer = a;
-        let r = a * b;
+        let r = a*b;
         document.getElementById("question").innerText = `${r} ÷ ${b} = ?`;
     } else {
         document.getElementById("question").innerText = `${a} ${op} ${b} = ?`;
     }
 
     time = timer;
-    document.getElementById("timer").innerText = time;
 
     interval = setInterval(()=>{
         time--;
         document.getElementById("timer").innerText = time;
 
-        if(time <= 0){
+        if(time<=0){
             lives--;
             checkGameOver();
             generateQuestion();
@@ -242,13 +286,13 @@ function checkAnswer(){
 
     let user = Number(document.getElementById("answer").value);
 
-    if(user === answer){
-        coins += 10;
-        totalCoins += 10;
-        document.getElementById("result").innerText = "✅ Doğru!";
+    if(user===answer){
+        coins+=10;
+        totalCoins+=10;
+        document.getElementById("result").innerText="✅ Doğru!";
     } else {
         lives--;
-        document.getElementById("result").innerText = "❌ Yanlış!";
+        document.getElementById("result").innerText="❌ Yanlış!";
     }
 
     updateUI();
@@ -257,8 +301,7 @@ function checkAnswer(){
 }
 
 function checkGameOver(){
-
-    if(lives <= 0){
+    if(lives<=0){
         alert("💀 Oyun Bitti!");
         backMenu();
     }
@@ -267,47 +310,45 @@ function checkGameOver(){
 /* ===== BOSS ===== */
 
 let bossAnswer;
-let bossTime = 10;
+let bossTime=10;
 let bossInterval;
-let danger = 0;
+let danger=0;
 
 function generateBoss(){
 
     clearInterval(bossInterval);
 
-    let a = Math.floor(Math.random()*20)+1;
-    let b = Math.floor(Math.random()*20)+1;
+    let a=Math.floor(Math.random()*20)+1;
+    let b=Math.floor(Math.random()*20)+1;
 
-    let ops = ["+","-","*"];
-    let op = ops[Math.floor(Math.random()*ops.length)];
+    let ops=["+","-","*"];
+    let op=ops[Math.floor(Math.random()*ops.length)];
 
-    if(op === "+") bossAnswer = a + b;
-    if(op === "-") bossAnswer = a - b;
-    if(op === "*") bossAnswer = a * b;
+    if(op==="+") bossAnswer=a+b;
+    if(op==="-") bossAnswer=a-b;
+    if(op==="*") bossAnswer=a*b;
 
-    document.getElementById("bossQuestion").innerText =
-        `${a} ${op} ${b} = ?`;
+    document.getElementById("bossQuestion").innerText=
+    `${a} ${op} ${b} = ?`;
 
-    bossTime = 10;
+    bossTime=10;
 
-    bossInterval = setInterval(()=>{
+    bossInterval=setInterval(()=>{
         bossTime--;
-        document.getElementById("bossTimer").innerText = bossTime;
+        document.getElementById("bossTimer").innerText=bossTime;
 
-        if(bossTime <= 0){
-            bossMiss();
-        }
+        if(bossTime<=0) bossMiss();
     },1000);
 }
 
 function checkBossAnswer(){
 
-    let user = Number(document.getElementById("bossAnswer").value);
+    let user=Number(document.getElementById("bossAnswer").value);
 
-    if(user === bossAnswer){
-        bossCoins += 50;
-        totalCoins += 50;
-        document.getElementById("bossResult").innerText = "✅ Vurdun!";
+    if(user===bossAnswer){
+        bossCoins+=50;
+        totalCoins+=50;
+        document.getElementById("bossResult").innerText="✅ Vurdun!";
         generateBoss();
     } else {
         bossMiss();
@@ -319,9 +360,9 @@ function checkBossAnswer(){
 function bossMiss(){
 
     danger++;
-    document.getElementById("danger").innerText = danger;
+    document.getElementById("danger").innerText=danger;
 
-    if(danger >= 3){
+    if(danger>=3){
         alert("💀 Canavar seni yakaladı!");
         backMenu();
     } else {
@@ -331,27 +372,16 @@ function bossMiss(){
 
 /* ===== SETTINGS ===== */
 
-let musicOn = true;
-let soundOn = true;
+let musicOn=true;
+let soundOn=true;
 
 function toggleMusic(){
-    musicOn = !musicOn;
+    musicOn=!musicOn;
 }
 
 function toggleSound(){
-    soundOn = !soundOn;
+    soundOn=!soundOn;
 }
-
-/* ===== UTIL ===== */
-
-function hideAll(){
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("game").style.display = "none";
-    document.getElementById("boss").style.display = "none";
-    document.getElementById("settings").style.display = "none";
-}
-
-updateUI();
 
 </script>
 
