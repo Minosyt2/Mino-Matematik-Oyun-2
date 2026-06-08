@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mino Matematik Oyun 2</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#3b82f6,#1e3a8a);
+    color:white;
+    text-align:center;
+}
+
+h1{
+    font-size:40px;
+    text-shadow:0 0 15px gold;
+}
+
+.btn{
+    width:260px;
+    padding:15px;
+    margin:8px;
+    font-size:18px;
+    border:none;
+    border-radius:15px;
+    cursor:pointer;
+    background:#22c55e;
+    color:white;
+}
+
+#menu, #game, #boss, #settings{
+    display:none;
+    padding-top:30px;
+}
+
+#menu{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+}
+input, select{
+    padding:10px;
+    font-size:18px;
+    border-radius:10px;
+    border:none;
+    text-align:center;
+}
+button{
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MENÜ -->
+<div id="menu">
+    <h1>🧮 MINO MATEMATİK OYUN 2</h1>
+
+    <p>🪙 Toplam Puan: <span id="menuCoins">0</span></p>
+
+    <button class="btn" onclick="startGame()">▶ Oyna</button>
+    <button class="btn" onclick="startBoss()">👹 Boss Fight</button>
+    <button class="btn" onclick="openSettings()">⚙ Ayarlar</button>
+    <button class="btn" onclick="resetAll()">🔁 Puan Sıfırla</button>
+</div>
+
+<!-- OYUN -->
+<div id="game">
+
+    <h2>🧮 Soruyu Çöz</h2>
+
+    <select id="difficulty">
+        <option value="easy">Kolay (60 sn)</option>
+        <option value="medium">Orta (30 sn)</option>
+        <option value="hard">Zor (15 sn)</option>
+    </select>
+
+    <h3 id="question"></h3>
+
+    <input type="number" id="answer">
+
+    <br>
+
+    <button onclick="checkAnswer()">Cevapla</button>
+
+    <p>🪙 Puan: <span id="coins">0</span></p>
+    <p>❤️ Can: <span id="lives">3</span></p>
+    <p>⏱ Süre: <span id="timer">0</span></p>
+
+    <p id="result"></p>
+
+    <button onclick="backMenu()">⬅ Menü</button>
+</div>
+
+<!-- BOSS -->
+<div id="boss">
+
+    <h1>👹 MATEMATİK CANAVARI</h1>
+
+    <h2 id="bossQuestion"></h2>
+
+    <input type="number" id="bossAnswer">
+
+    <br>
+
+    <button onclick="checkBossAnswer()">Cevapla</button>
+
+    <button onclick="resetAll()">🔁 Puan Sıfırla</button>
+
+    <p>⏱ Süre: <span id="bossTimer">10</span></p>
+    <p>💀 Yaklaşma: <span id="danger">0</span>/3</p>
+    <p>🪙 Boss Puan: <span id="bossCoins">0</span></p>
+
+    <p id="bossResult"></p>
+
+    <button onclick="backMenu()">⬅ Menü</button>
+</div>
+
+<!-- AYARLAR -->
+<div id="settings">
+
+    <h1>⚙ Ayarlar</h1>
+
+    <button class="btn" onclick="toggleMusic()">🎵 Müzik</button>
+    <button class="btn" onclick="toggleSound()">🔊 Ses</button>
+
+    <br><br>
+    <button class="btn" onclick="backMenu()">⬅ Geri</button>
+</div>
+
+<script>
+
+/* ===== GLOBAL ===== */
+
+let answer;
+let coins = 0;
+let bossCoins = 0;
+let totalCoins = 0;
+let lives = 3;
+let time;
+let interval;
+
+/* ===== MENÜ ===== */
+
+function startGame(){
+    hideAll();
+    document.getElementById("game").style.display = "block";
+    generateQuestion();
+}
+
+function startBoss(){
+    hideAll();
+    document.getElementById("boss").style.display = "block";
+    generateBoss();
+}
+
+function openSettings(){
+    hideAll();
+    document.getElementById("settings").style.display = "block";
+}
+
+function backMenu(){
+    hideAll();
+    document.getElementById("menu").style.display = "flex";
+}
+
+/* ===== RESET ===== */
+
+function resetAll(){
+
+    coins = 0;
+    bossCoins = 0;
+    totalCoins = 0;
+    lives = 3;
+
+    updateUI();
+
+    alert("🔁 Puanlar sıfırlandı!");
+}
+
+function updateUI(){
+    document.getElementById("coins").innerText = coins;
+    document.getElementById("bossCoins").innerText = bossCoins;
+    document.getElementById("menuCoins").innerText = totalCoins;
+    document.getElementById("lives").innerText = lives;
+}
+
+/* ===== NORMAL OYUN ===== */
+
+function generateQuestion(){
+
+    clearInterval(interval);
+
+    let diff = document.getElementById("difficulty").value;
+
+    let max = 20;
+    let timer = 60;
+
+    if(diff === "medium"){ max = 50; timer = 30; }
+    if(diff === "hard"){ max = 100; timer = 15; }
+
+    let a = Math.floor(Math.random()*max)+1;
+    let b = Math.floor(Math.random()*max)+1;
+
+    let ops = ["+","-","*","/"];
+    let op = ops[Math.floor(Math.random()*ops.length)];
+
+    if(op === "+") answer = a + b;
+    if(op === "-") answer = a - b;
+    if(op === "*") answer = a * b;
+
+    if(op === "/"){
+        answer = a;
+        let r = a * b;
+        document.getElementById("question").innerText = `${r} ÷ ${b} = ?`;
+    } else {
+        document.getElementById("question").innerText = `${a} ${op} ${b} = ?`;
+    }
+
+    time = timer;
+    document.getElementById("timer").innerText = time;
+
+    interval = setInterval(()=>{
+        time--;
+        document.getElementById("timer").innerText = time;
+
+        if(time <= 0){
+            lives--;
+            checkGameOver();
+            generateQuestion();
+        }
+    },1000);
+}
+
+function checkAnswer(){
+
+    let user = Number(document.getElementById("answer").value);
+
+    if(user === answer){
+        coins += 10;
+        totalCoins += 10;
+        document.getElementById("result").innerText = "✅ Doğru!";
+    } else {
+        lives--;
+        document.getElementById("result").innerText = "❌ Yanlış!";
+    }
+
+    updateUI();
+    checkGameOver();
+    generateQuestion();
+}
+
+function checkGameOver(){
+
+    if(lives <= 0){
+        alert("💀 Oyun Bitti!");
+        backMenu();
+    }
+}
+
+/* ===== BOSS ===== */
+
+let bossAnswer;
+let bossTime = 10;
+let bossInterval;
+let danger = 0;
+
+function generateBoss(){
+
+    clearInterval(bossInterval);
+
+    let a = Math.floor(Math.random()*20)+1;
+    let b = Math.floor(Math.random()*20)+1;
+
+    let ops = ["+","-","*"];
+    let op = ops[Math.floor(Math.random()*ops.length)];
+
+    if(op === "+") bossAnswer = a + b;
+    if(op === "-") bossAnswer = a - b;
+    if(op === "*") bossAnswer = a * b;
+
+    document.getElementById("bossQuestion").innerText =
+        `${a} ${op} ${b} = ?`;
+
+    bossTime = 10;
+
+    bossInterval = setInterval(()=>{
+        bossTime--;
+        document.getElementById("bossTimer").innerText = bossTime;
+
+        if(bossTime <= 0){
+            bossMiss();
+        }
+    },1000);
+}
+
+function checkBossAnswer(){
+
+    let user = Number(document.getElementById("bossAnswer").value);
+
+    if(user === bossAnswer){
+        bossCoins += 50;
+        totalCoins += 50;
+        document.getElementById("bossResult").innerText = "✅ Vurdun!";
+        generateBoss();
+    } else {
+        bossMiss();
+    }
+
+    updateUI();
+}
+
+function bossMiss(){
+
+    danger++;
+    document.getElementById("danger").innerText = danger;
+
+    if(danger >= 3){
+        alert("💀 Canavar seni yakaladı!");
+        backMenu();
+    } else {
+        generateBoss();
+    }
+}
+
+/* ===== SETTINGS ===== */
+
+let musicOn = true;
+let soundOn = true;
+
+function toggleMusic(){
+    musicOn = !musicOn;
+}
+
+function toggleSound(){
+    soundOn = !soundOn;
+}
+
+/* ===== UTIL ===== */
+
+function hideAll(){
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("game").style.display = "none";
+    document.getElementById("boss").style.display = "none";
+    document.getElementById("settings").style.display = "none";
+}
+
+updateUI();
+
+</script>
+
+</body>
+</html>
